@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Plan</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="conclusion">总结</string>
+    <string name="save_change">保存修改</string>
+
+</resources>
