@@ -35,4 +35,13 @@ public class Dater {
             w = 0;
         return weekDays[w];
     }
+
+    /** 比较量日期是否相等，忽略时分秒
+     *
+     */
+    public static boolean sameDate(Date d1, Date d2){
+        SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMdd");
+        //fmt.setTimeZone(new TimeZone()); // 如果需要设置时间区域，可以在这里设置
+        return fmt.format(d1).equals(fmt.format(d2));
+    }
 }

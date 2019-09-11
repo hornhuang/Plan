@@ -4,39 +4,45 @@ import cn.bmob.v3.BmobObject;
 
 public class Plan extends BmobObject {
 
-    private String from;
+    private String from[];
 
-    private String to;
+    private String to[];
 
     private String name;
 
     private int degree;
 
-    public Plan() {
+    private boolean completed = false;
+
+    public Plan Plan() {
+        return new Plan();
     }
 
-    public String getFrom() {
+    public String[] getFrom() {
         return from;
     }
 
-    public void setFrom(String from) {
+    public Plan setFrom(String[] from) {
         this.from = from;
+        return this;
     }
 
-    public String getTo() {
+    public String[] getTo() {
         return to;
     }
 
-    public void setTo(String to) {
+    public Plan setTo(String[] to) {
         this.to = to;
+        return this;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public Plan setName(String name) {
         this.name = name;
+        return this;
     }
 
     public int getDegree() {
@@ -45,5 +51,13 @@ public class Plan extends BmobObject {
 
     public void setDegree(int degree) {
         this.degree = degree;
+    }
+
+    public boolean isCompleted() {
+        return completed;
+    }
+
+    public void setCompleted(boolean completed) {
+        this.completed = completed;
     }
 }

@@ -14,7 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.plan.R;
-import com.example.plan.activities.PushPlanActivity;
+import com.example.plan.activities.PushReviewActivity;
 import com.example.plan.adapters.LessonAdapter;
 import com.example.plan.bmobclass.Lesson;
 import com.example.plan.utils.Dater;
@@ -71,7 +71,7 @@ public class ReviewFragment extends BaseFragment {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                PushPlanActivity.actionStart(getActivity());
+                PushReviewActivity.actionStart(getActivity());
             }
         });
 
@@ -102,7 +102,6 @@ public class ReviewFragment extends BaseFragment {
                         if (e == null) {
                             resetPlanLists(object);
                             mRefreshLayout.setRefreshing(false);
-                            toast("成功！" );
                         } else {
                             toast("失败！" + e.getMessage());
                         }

@@ -6,6 +6,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.plan.R;
@@ -14,6 +15,8 @@ import com.example.plan.bmobclass.Plan;
 import java.util.List;
 
 public class PlanAdapter extends RecyclerView.Adapter<PlanAdapter.ViewHolder> {
+
+    private final int PASSLINE = 80;
 
     private List<Plan> mList;
 
@@ -34,16 +37,30 @@ public class PlanAdapter extends RecyclerView.Adapter<PlanAdapter.ViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
     final Plan plan = mList.get(i);
-        viewHolder.from.setText(plan.getFrom());
-        viewHolder.to.setText(plan.getTo());
+        viewHolder.from.setText(plan.getFrom()[0] + " : " + plan.getFrom()[1]);
+        viewHolder.to.setText(plan.getTo()[0] + " : " + plan.getTo()[1]);
         viewHolder.name.setText(plan.getName());
-        viewHolder.degree.setText(plan.getDegree());
+        setImg(viewHolder.degree, plan);
         viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
             }
         });
+    }
+
+    private void setImg(ImageView Img, Plan plan) {
+        if (plan.isCompleted()){
+            int degree = plan.getDegree();
+            if ( degree > PASSLINE || degree == PASSLINE ){
+                Img.setImageResource(R.drawable.completed);
+            }else{
+                Img.setImageResource(R.drawable.failed);
+            }
+        }else {
+            Img.setImageResource(R.drawable.undo);
+        }
+
     }
 
     @Override
@@ -53,20 +70,20 @@ public class PlanAdapter extends RecyclerView.Adapter<PlanAdapter.ViewHolder> {
 
     class ViewHolder extends RecyclerView.ViewHolder {
 
+        private ImageView degree;
+
         private TextView from;
 
         private TextView to;
 
         private TextView name;
 
-        private TextView degree;
-
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
+            degree = itemView.findViewById(R.id.degree);
+            name   = itemView.findViewById(R.id.name);
             from   = itemView.findViewById(R.id.from);
             to     = itemView.findViewById(R.id.to);
-            name   = itemView.findViewById(R.id.name);
-            degree = itemView.findViewById(R.id.degree);
 
         }
     }
