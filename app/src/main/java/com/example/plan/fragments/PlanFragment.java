@@ -8,6 +8,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -20,7 +21,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
@@ -29,10 +29,8 @@ import com.example.plan.activities.MainActivity;
 import com.example.plan.adapters.PlanAdapter;
 import com.example.plan.bmobclass.Day;
 import com.example.plan.bmobclass.Plan;
-import com.example.plan.utils.Dater;
 import com.example.plan.utils.Gallery;
 
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -97,8 +95,6 @@ public class PlanFragment extends BaseFragment implements View.OnClickListener {
 
     private PlanAdapter planAdapter;
 
-    private Plan finalPlan;
-
     private void getPlan(String planId){
         //查找Person表里面id为6b6c11c537的数据
         BmobQuery<Plan> bmobQuery = new BmobQuery<Plan>();
@@ -125,64 +121,11 @@ public class PlanFragment extends BaseFragment implements View.OnClickListener {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_plan, container, false);
-        try {
-            load();
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
         iniViews(view);
-        if (day == null)
-            iniRecycler();
+        iniRecycler();
+        load();
+//        if (day == null)
         return view;
-    }
-
-    /**
-     * 某个昨天以后的计划
-     */
-    private void load() throws ParseException {
-        Calendar   cal   =   Calendar.getInstance();
-        cal.add(Calendar.DATE,   -1);
-        BmobDate bmobCreatedAtDate = new BmobDate(cal.getTime());
-
-        BmobQuery<Day> categoryBmobQuery = new BmobQuery<>();
-        categoryBmobQuery.addWhereGreaterThanOrEqualTo("createdAt", bmobCreatedAtDate);
-        categoryBmobQuery.findObjects(new FindListener<Day>() {
-            @Override
-            public void done(List<Day> object, BmobException e) {
-                if (e == null) {
-                    Toast.makeText(getActivity(), "is in" + object.size(), Toast.LENGTH_SHORT).show();
-                    if (object.size() == 0){
-                        return;
-                    }
-                    day = object.get(0);
-                    Observable.fromIterable(day.getPlanList())
-                            .subscribe(new Observer<String>() {
-                                @Override
-                                public void onSubscribe(Disposable d) {
-
-                                }
-
-                                @Override
-                                public void onNext(String s) {
-                                    getPlan(s);
-                                }
-
-                                @Override
-                                public void onError(Throwable e) {
-
-                                }
-
-                                @Override
-                                public void onComplete() {
-
-                                }
-                            });
-                } else {
-                    Toast.makeText(getActivity(), "un in"+e.toString(), Toast.LENGTH_SHORT).show();
-
-                }
-            }
-        });
     }
 
     private void iniViews(View view){
@@ -213,6 +156,86 @@ public class PlanFragment extends BaseFragment implements View.OnClickListener {
                 refreshLayout.setRefreshing(false);
             }
         });
+    }
+
+    /**
+     * 某个昨天以后的计划
+     */
+    private void load() {
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.DATE,   -1);
+        BmobDate bmobCreatedAtDate = new BmobDate(cal.getTime());
+
+        Log.d(TAG, "started");
+
+        BmobQuery<Day> categoryBmobQuery = new BmobQuery<>();
+        categoryBmobQuery.addWhereGreaterThanOrEqualTo("createdAt", bmobCreatedAtDate);
+        categoryBmobQuery.findObjects(new FindListener<Day>() {
+            @Override
+            public void done(List<Day> object, BmobException e) {
+                if (e == null) {
+                    if (object.size() == 0){
+                        // ...
+                        return;
+                    }else {
+                        day = object.get(0);
+                        Observable.fromIterable(day.getPlanList())
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(Schedulers.io())
+                                .subscribe(new Observer<String>() {
+                                    @Override
+                                    public void onSubscribe(Disposable d) {
+
+                                    }
+
+                                    @Override
+                                    public void onNext(String plan) {
+                                        containAll(plan);
+                                    }
+
+                                    @Override
+                                    public void onError(Throwable e) {
+
+                                    }
+
+                                    @Override
+                                    public void onComplete() {
+
+                                    }
+                                });
+                    }
+
+                } else {
+                    Log.d(TAG, "failed" + e.toString());
+                }
+            }
+        });
+    }
+
+    /**
+     * 查询计划
+     */
+    private void containAll(String objectId) {
+        BmobQuery<Plan> bmobQuery = new BmobQuery<>();
+        bmobQuery.getObject(objectId, new QueryListener<Plan>() {
+            @Override
+            public void done(Plan object,BmobException e) {
+                if(e==null){
+                    planList.add(object);
+                    planAdapter.notifyDataSetChanged();
+                }else{
+
+                }
+            }
+        });
+    }
+
+    private void iniRecycler(){
+        planList = new ArrayList<>();
+        LinearLayoutManager manager = new LinearLayoutManager(getActivity());
+        recyclerView.setLayoutManager(manager);
+        planAdapter = new PlanAdapter(planList, getActivity());
+        recyclerView.setAdapter(planAdapter);
     }
 
     @Override
@@ -252,22 +275,12 @@ public class PlanFragment extends BaseFragment implements View.OnClickListener {
         return true;
     }
 
-    private void iniRecycler(){
-        if (planList == null){
-            planList = new ArrayList<>();
-        }
-        LinearLayoutManager manager = new LinearLayoutManager(getActivity());
-        recyclerView.setLayoutManager(manager);
-        planAdapter = new PlanAdapter(planList, getActivity());
-        recyclerView.setAdapter(planAdapter);
-    }
-
     @Override
     public void onClick(View v) {
         int id = v.getId();
         switch (id) {
             case R.id.save_change:
-                savePlans();
+                pushNewDay();
                 break;
             case R.id.fab:
                 dialogShow();
@@ -275,48 +288,43 @@ public class PlanFragment extends BaseFragment implements View.OnClickListener {
         }
     }
 
-    private void savePlans(){
-        List<Plan> plans = new ArrayList<>();
-        for(Plan plan : planList){
-            if (plan.getObjectId() == null) plans.add(plan);
-        }
-        if (plans.size() == 0 ){
-            if (day == null){
-                save();
-            }else {
-                upload();
+    /**
+     * 提交空 Day
+     * 开启新的一天
+     */
+    private void pushNewDay(){
+        new Day().save(new SaveListener<String>() {
+            @Override
+            public void done(String objectId, BmobException e) {
+                if(e==null){
+                    toast("Day :"+objectId);
+                }else{
+                    toast("创建数据失败：" + e.getMessage());
+                }
             }
-        }else {
-            finalPlan = plans.get(plans.size()-1);
-            Observable.fromIterable(plans)
-                    .subscribeOn(Schedulers.io())
-                    .subscribe(new Observer<Plan>() {
-                        @Override
-                        public void onSubscribe(Disposable d) {
+        });
+    }
 
-                        }
-
-                        @Override
-                        public void onNext(Plan plan) {
-                            savePlan(plan);
-                        }
-
-                        @Override
-                        public void onError(Throwable e) {
-
-                        }
-
-                        @Override
-                        public void onComplete() {
-                        }
-                    });
-        }
+    private void savePlan(Plan p){
+        p.save(new SaveListener<String>() {
+            @Override
+            public void done(String objectId,BmobException e) {
+                if(e==null){
+                    log(TAG, "添加数据成功，返回objectId为："+objectId);
+                    if (day == null){
+                        save();
+                    }else {
+                        upDate();
+                    }
+                }else{
+                    log(TAG, "创建数据失败：" + e.getMessage());
+                }
+            }
+        });
     }
 
     private void save(){
-        if (day == null) {
-            day = new Day();
-        }
+        day = new Day();
         day.setCreateDate(new Date());
         List<String> planIds = new ArrayList<>();
         for (Plan plan : planList){
@@ -334,7 +342,7 @@ public class PlanFragment extends BaseFragment implements View.OnClickListener {
             @Override
             public void done(String objectId, BmobException e) {
                 if(e==null){
-                    toast("添加数据成功，返回objectId为："+objectId);
+                    toast("Day :"+objectId);
                 }else{
                     toast("创建数据失败：" + e.getMessage());
                 }
@@ -342,7 +350,7 @@ public class PlanFragment extends BaseFragment implements View.OnClickListener {
         });
     }
 
-    private void upload(){
+    private void upDate(){
         day.setCreateDate(new Date());
         List<String> planIds = new ArrayList<>();
         for (Plan plan : planList){
@@ -364,29 +372,10 @@ public class PlanFragment extends BaseFragment implements View.OnClickListener {
                     toast("更新成功:");
                 }else{
                     toast("更新失败：" + e.getMessage());
+                    Log.d(TAG, "更新失败" + e.toString());
                 }
             }
 
-        });
-    }
-
-    private void savePlan(final Plan p){
-        p.save(new SaveListener<String>() {
-            @Override
-            public void done(String objectId,BmobException e) {
-                if(e==null){
-                    toast("添加数据成功，返回objectId为："+objectId);
-                    if (p.equals(finalPlan)){
-                        if (day == null){
-                            save();
-                        }else {
-                            upload();
-                        }
-                    }
-                }else{
-                    toast("创建数据失败：" + e.getMessage());
-                }
-            }
         });
     }
 
@@ -406,11 +395,11 @@ public class PlanFragment extends BaseFragment implements View.OnClickListener {
         final EditText planName      = v.findViewById(R.id.plan_name);
         Button btn_sure   = v.findViewById(R.id.dialog_btn_sure);
         Button btn_cancel = v.findViewById(R.id.dialog_btn_cancel);
-        //builer.setView(v);//这里如果使用builer.setView(v)，自定义布局只会覆盖title和button之间的那部分
+        // builer.setView(v);//这里如果使用builer.setView(v)，自定义布局只会覆盖title和button之间的那部分
         final Dialog dialog = builder.create();
         dialog.show();
         dialog.getWindow().setContentView(v);//自定义布局应该在这里添加，要在dialog.show()的后面
-        //dialog.getWindow().setGravity(Gravity.CENTER);//可以设置显示的位置
+        // dialog.getWindow().setGravity(Gravity.CENTER);//可以设置显示的位置
         btn_sure.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -421,6 +410,7 @@ public class PlanFragment extends BaseFragment implements View.OnClickListener {
                         .setName(planName.getText().toString());
                 planList.add(plan);
                 planAdapter.notifyDataSetChanged();
+                savePlan(plan);
                 dialog.dismiss();
             }
         });

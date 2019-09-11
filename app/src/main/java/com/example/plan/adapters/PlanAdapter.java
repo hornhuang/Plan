@@ -36,9 +36,11 @@ public class PlanAdapter extends RecyclerView.Adapter<PlanAdapter.ViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
-    final Plan plan = mList.get(i);
-        viewHolder.from.setText(plan.getFrom()[0] + " : " + plan.getFrom()[1]);
-        viewHolder.to.setText(plan.getTo()[0] + " : " + plan.getTo()[1]);
+        final Plan plan = mList.get(i);
+        if (plan.getFrom() != null)
+            viewHolder.from.setText(plan.getFrom()[0] + " : " + plan.getFrom()[1]);
+        if (plan.getTo()   != null)
+            viewHolder.to.setText(plan.getTo()[0] + " : " + plan.getTo()[1]);
         viewHolder.name.setText(plan.getName());
         setImg(viewHolder.degree, plan);
         viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
