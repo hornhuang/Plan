@@ -4,13 +4,13 @@ import cn.bmob.v3.BmobObject;
 
 public class Plan extends BmobObject {
 
-    private String from[];
+    private String from[] = new String[2];
 
-    private String to[];
+    private String to[] = new String[2];
 
-    private String name;
+    private String name = "";
 
-    private int degree;
+    private int degree = 0;
 
     private boolean completed = false;
 

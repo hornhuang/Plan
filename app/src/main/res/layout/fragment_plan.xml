@@ -30,6 +30,8 @@
                 android:id="@+id/yes_conclusion"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textSize="20sp"
+                android:textColor="@color/colorPrimary"
                 android:layout_margin="10dp"/>
 
         </RelativeLayout>
@@ -71,7 +73,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@color/colorPrimary"
-                    android:text="@string/save_change"
+                    android:text="@string/new_day"
                     android:textSize="23sp"
                     android:textColor="@color/white"
                     android:padding="5dp"

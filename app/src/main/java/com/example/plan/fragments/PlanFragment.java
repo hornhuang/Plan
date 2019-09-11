@@ -1,6 +1,7 @@
 package com.example.plan.fragments;
 
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -21,6 +22,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
@@ -89,27 +91,11 @@ public class PlanFragment extends BaseFragment implements View.OnClickListener {
      * @param savedInstanceState
      */
 
-    private Day day;
+    private Day day, yesDay;
 
     private List<Plan> planList;
 
     private PlanAdapter planAdapter;
-
-    private void getPlan(String planId){
-        //查找Person表里面id为6b6c11c537的数据
-        BmobQuery<Plan> bmobQuery = new BmobQuery<Plan>();
-        bmobQuery.getObject(planId, new QueryListener<Plan>() {
-            @Override
-            public void done(Plan object,BmobException e) {
-                if(e==null){
-                    planList.add(object);
-                    toast("查询成功");
-                }else{
-                    toast("查询失败：" + e.getMessage());
-                }
-            }
-        });
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -124,7 +110,6 @@ public class PlanFragment extends BaseFragment implements View.OnClickListener {
         iniViews(view);
         iniRecycler();
         load();
-//        if (day == null)
         return view;
     }
 
@@ -148,6 +133,7 @@ public class PlanFragment extends BaseFragment implements View.OnClickListener {
 
         save.setOnClickListener(this);
         mAddFab.setOnClickListener(this);
+        conclusion.setOnClickListener(this);
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -163,10 +149,8 @@ public class PlanFragment extends BaseFragment implements View.OnClickListener {
      */
     private void load() {
         Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.DATE,   -1);
+        cal.add(Calendar.DATE, -1);
         BmobDate bmobCreatedAtDate = new BmobDate(cal.getTime());
-
-        Log.d(TAG, "started");
 
         BmobQuery<Day> categoryBmobQuery = new BmobQuery<>();
         categoryBmobQuery.addWhereGreaterThanOrEqualTo("createdAt", bmobCreatedAtDate);
@@ -174,11 +158,19 @@ public class PlanFragment extends BaseFragment implements View.OnClickListener {
             @Override
             public void done(List<Day> object, BmobException e) {
                 if (e == null) {
+                    Log.d(TAG, object.size()+"");
                     if (object.size() == 0){
                         // ...
                         return;
                     }else {
-                        day = object.get(0);
+                        if (object.size() > 1){
+                            yesDay = object.get(object.size()-2);
+                        }else {
+                            yesDay = new Day();
+                        }
+                        day    = object.get(object.size()-1);
+                        conclusion.setText(day.getConclusion());
+                        mYesConclusion.setText(yesDay.getConclusion());
                         Observable.fromIterable(day.getPlanList())
                                 .subscribeOn(Schedulers.io())
                                 .observeOn(Schedulers.io())
@@ -190,7 +182,7 @@ public class PlanFragment extends BaseFragment implements View.OnClickListener {
 
                                     @Override
                                     public void onNext(String plan) {
-                                        containAll(plan);
+                                        getPlan(plan);
                                     }
 
                                     @Override
@@ -215,7 +207,7 @@ public class PlanFragment extends BaseFragment implements View.OnClickListener {
     /**
      * 查询计划
      */
-    private void containAll(String objectId) {
+    private void getPlan(String objectId) {
         BmobQuery<Plan> bmobQuery = new BmobQuery<>();
         bmobQuery.getObject(objectId, new QueryListener<Plan>() {
             @Override
@@ -234,7 +226,7 @@ public class PlanFragment extends BaseFragment implements View.OnClickListener {
         planList = new ArrayList<>();
         LinearLayoutManager manager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(manager);
-        planAdapter = new PlanAdapter(planList, getActivity());
+        planAdapter = new PlanAdapter(planList, getActivity(), this);
         recyclerView.setAdapter(planAdapter);
     }
 
@@ -245,7 +237,6 @@ public class PlanFragment extends BaseFragment implements View.OnClickListener {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
         RequestOptions options = new RequestOptions()
                 .transform(new BlurTransformation(25, 5));
 
@@ -285,6 +276,13 @@ public class PlanFragment extends BaseFragment implements View.OnClickListener {
             case R.id.fab:
                 dialogShow();
                 break;
+            case R.id.conclusion:
+                if (day == null){
+                    save();
+                }else {
+                    showEditDialog();
+                }
+                break;
         }
     }
 
@@ -297,7 +295,7 @@ public class PlanFragment extends BaseFragment implements View.OnClickListener {
             @Override
             public void done(String objectId, BmobException e) {
                 if(e==null){
-                    toast("Day :"+objectId);
+                    toast("Day :" + objectId);
                 }else{
                     toast("创建数据失败：" + e.getMessage());
                 }
@@ -320,6 +318,21 @@ public class PlanFragment extends BaseFragment implements View.OnClickListener {
                     log(TAG, "创建数据失败：" + e.getMessage());
                 }
             }
+        });
+    }
+
+    public void updatePlan(Plan p){
+        p.update(p.getObjectId(), new UpdateListener() {
+
+            @Override
+            public void done(BmobException e) {
+                if(e==null){
+                    Toast.makeText(getActivity(), "更新成功:", Toast.LENGTH_SHORT).show();
+                }else{
+
+                }
+            }
+
         });
     }
 
@@ -350,7 +363,7 @@ public class PlanFragment extends BaseFragment implements View.OnClickListener {
         });
     }
 
-    private void upDate(){
+    public void upDate(){
         day.setCreateDate(new Date());
         List<String> planIds = new ArrayList<>();
         for (Plan plan : planList){
@@ -387,7 +400,7 @@ public class PlanFragment extends BaseFragment implements View.OnClickListener {
     private void dialogShow() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = LayoutInflater.from(getActivity());
-        View v = inflater.inflate(R.layout.push_item_dialog, null);
+        View v = inflater.inflate(R.layout.dialog_push_item, null);
         final EditText fromHour    = v.findViewById(R.id.start_hour);
         final EditText fromMinutes = v.findViewById(R.id.start_minutes);
         final EditText toHour      = v.findViewById(R.id.end_hour);
@@ -422,5 +435,31 @@ public class PlanFragment extends BaseFragment implements View.OnClickListener {
                 dialog.dismiss();
             }
         });
+    }
+
+    /**
+     *
+     * @return
+     */
+    private void showEditDialog(){
+        final EditText et = new EditText(getActivity());
+
+        new AlertDialog.Builder(getActivity()).setTitle("搜索")
+                .setIcon(android.R.drawable.ic_dialog_info)
+                .setView(et)
+                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        String input = et.getText().toString();
+                        conclusion.setText(input);
+                        day.setConclusion(input);
+                        upDate();
+                    }
+                })
+                .setNegativeButton("取消", null)
+                .show();
+    }
+
+    public List<Plan> getPlanList() {
+        return planList;
     }
 }
