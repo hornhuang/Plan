@@ -41,45 +41,55 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <LinearLayout
-                android:id="@+id/linearlayout"
+            <ScrollView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:layout_height="wrap_content">
 
-                <android.support.v7.widget.RecyclerView
-                    android:id="@+id/recycler"
+                <LinearLayout
+                    android:id="@+id/linearlayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/hello_blank_fragment" />
+                    android:orientation="vertical">
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/conclusion"
-                    android:textSize="25sp"
-                    android:layout_margin="5dp"/>
+                    <android.support.v7.widget.RecyclerView
+                        android:id="@+id/recycler"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/hello_blank_fragment" />
 
-                <TextView
-                    android:id="@+id/conclusion"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/edit_shape"
-                    android:minLines="3"
-                    android:layout_margin="5dp"/>
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/conclusion"
+                        android:textSize="25sp"
+                        android:layout_margin="10dp"/>
 
-                <Button
-                    android:id="@+id/save_change"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@color/colorPrimary"
-                    android:text="@string/new_day"
-                    android:textSize="23sp"
-                    android:textColor="@color/white"
-                    android:padding="5dp"
-                    android:layout_margin="5dp"/>
+                    <TextView
+                        android:id="@+id/conclusion"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/edit_shape"
+                        android:minLines="3"
+                        android:layout_margin="10dp"/>
 
-            </LinearLayout>
+                    <Button
+                        android:id="@+id/save_change"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@color/colorPrimary"
+                        android:text="@string/new_day"
+                        android:textSize="23sp"
+                        android:textColor="@color/white"
+                        android:padding="5dp"
+                        android:layout_margin="10dp"/>
+
+                    <View
+                        android:layout_width="wrap_content"
+                        android:layout_height="?actionBarSize"/>
+
+                </LinearLayout>
+
+            </ScrollView>
 
         </android.support.v4.widget.SwipeRefreshLayout>
 

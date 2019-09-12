@@ -1,4 +1,6 @@
 apply plugin: 'com.android.application'
+//apply plugin: 'com.android.library'
+//apply plugin: 'com.jakewharton.butterknife'
 
 android {
     compileSdkVersion 28
@@ -16,6 +18,11 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    // Butterknife requires Java 8.
+//    compileOptions {
+//        sourceCompatibility JavaVersion.VERSION_1_8
+//        targetCompatibility JavaVersion.VERSION_1_8
+//    }
     useLibrary 'org.apache.http.legacy'// Bmob
 }
 
@@ -43,4 +50,8 @@ dependencies {
     implementation 'jp.wasabeef:glide-transformations:4.0.0'
 
     implementation 'com.github.mcxtzhang:SwipeDelMenuLayout:V1.3.0'// 侧拉删除
+
+    // Butter Knife
+//    implementation 'com.jakewharton:butterknife:10.1.0'
+//    annotationProcessor 'com.jakewharton:butterknife-compiler:10.1.0'
 }

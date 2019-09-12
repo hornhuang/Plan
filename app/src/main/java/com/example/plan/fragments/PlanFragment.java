@@ -16,6 +16,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -36,8 +37,8 @@ import com.example.plan.utils.Gallery;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
-
 import cn.bmob.v3.BmobQuery;
 import cn.bmob.v3.datatype.BmobDate;
 import cn.bmob.v3.exception.BmobException;
@@ -95,6 +96,10 @@ public class PlanFragment extends BaseFragment implements View.OnClickListener {
 
     private List<Plan> planList;
 
+    private HashMap<String, Plan> planMap;// 确保 planList 有序
+
+    private List<String> planIds;// 拷贝自 day -> planList
+
     private PlanAdapter planAdapter;
 
     @Override
@@ -142,6 +147,7 @@ public class PlanFragment extends BaseFragment implements View.OnClickListener {
                 refreshLayout.setRefreshing(false);
             }
         });
+
     }
 
     /**
@@ -158,7 +164,6 @@ public class PlanFragment extends BaseFragment implements View.OnClickListener {
             @Override
             public void done(List<Day> object, BmobException e) {
                 if (e == null) {
-                    Log.d(TAG, object.size()+"");
                     if (object.size() == 0){
                         // ...
                         return;
@@ -171,6 +176,8 @@ public class PlanFragment extends BaseFragment implements View.OnClickListener {
                         day    = object.get(object.size()-1);
                         conclusion.setText(day.getConclusion());
                         mYesConclusion.setText(yesDay.getConclusion());
+                        planIds = new ArrayList<>();
+                        planIds.addAll(day.getPlanList());
                         Observable.fromIterable(day.getPlanList())
                                 .subscribeOn(Schedulers.io())
                                 .observeOn(Schedulers.io())
@@ -181,8 +188,8 @@ public class PlanFragment extends BaseFragment implements View.OnClickListener {
                                     }
 
                                     @Override
-                                    public void onNext(String plan) {
-                                        getPlan(plan);
+                                    public void onNext(String s) {
+                                        getPlan(s);
                                     }
 
                                     @Override
@@ -211,10 +218,34 @@ public class PlanFragment extends BaseFragment implements View.OnClickListener {
         BmobQuery<Plan> bmobQuery = new BmobQuery<>();
         bmobQuery.getObject(objectId, new QueryListener<Plan>() {
             @Override
-            public void done(Plan object,BmobException e) {
+            public void done(Plan plan,BmobException e) {
                 if(e==null){
-                    planList.add(object);
-                    planAdapter.notifyDataSetChanged();
+                    // 有序插入
+                    String objectId = planIds.get(0);
+                    // 如果为有序序列下一个，则进行插入
+                    // 否则插入哈希表
+                    if (objectId.equals(plan.getObjectId())){
+                        planList.add(plan);
+                        planAdapter.notifyDataSetChanged();
+                        // 插入后移除有序序列第一项
+                        planIds.remove(0);
+                        // 由于下一项可能在之前已经到达，所以要在哈希表中查询
+                        objectId = planIds.get(0);
+                        plan = planMap.get(objectId);
+                        // 如果下一项在哈希表中，则继续查下下项是否也在
+                        // 以此类推到哈希表中找不到有序序列下一项为止
+                        while (plan != null){
+                            planList.add(plan);
+                            planAdapter.notifyDataSetChanged();
+                            planIds.remove(0);
+                            objectId = planIds.get(0);
+                            plan = planMap.get(objectId);
+                        }
+                    }else {
+                        // 不为下一个计划
+                        // 插入哈希表
+                        planMap.put(plan.getObjectId(), plan);
+                    }
                 }else{
 
                 }
@@ -224,6 +255,7 @@ public class PlanFragment extends BaseFragment implements View.OnClickListener {
 
     private void iniRecycler(){
         planList = new ArrayList<>();
+        planMap  = new HashMap<>();
         LinearLayoutManager manager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(manager);
         planAdapter = new PlanAdapter(planList, getActivity(), this);
@@ -405,7 +437,7 @@ public class PlanFragment extends BaseFragment implements View.OnClickListener {
         final EditText fromMinutes = v.findViewById(R.id.start_minutes);
         final EditText toHour      = v.findViewById(R.id.end_hour);
         final EditText toMinutes   = v.findViewById(R.id.end_minutes);
-        final EditText planName      = v.findViewById(R.id.plan_name);
+        final EditText planName    = v.findViewById(R.id.plan_name);
         Button btn_sure   = v.findViewById(R.id.dialog_btn_sure);
         Button btn_cancel = v.findViewById(R.id.dialog_btn_cancel);
         // builer.setView(v);//这里如果使用builer.setView(v)，自定义布局只会覆盖title和button之间的那部分
@@ -435,6 +467,9 @@ public class PlanFragment extends BaseFragment implements View.OnClickListener {
                 dialog.dismiss();
             }
         });
+
+        dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
+        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
     }
 
     /**
@@ -444,7 +479,7 @@ public class PlanFragment extends BaseFragment implements View.OnClickListener {
     private void showEditDialog(){
         final EditText et = new EditText(getActivity());
 
-        new AlertDialog.Builder(getActivity()).setTitle("搜索")
+        Dialog dialog = new AlertDialog.Builder(getActivity()).setTitle("今天总结一下：")
                 .setIcon(android.R.drawable.ic_dialog_info)
                 .setView(et)
                 .setPositiveButton("确定", new DialogInterface.OnClickListener() {
@@ -457,6 +492,8 @@ public class PlanFragment extends BaseFragment implements View.OnClickListener {
                 })
                 .setNegativeButton("取消", null)
                 .show();
+        dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
+        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
     }
 
     public List<Plan> getPlanList() {
