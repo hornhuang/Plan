@@ -39,6 +39,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import cn.bmob.v3.BmobQuery;
 import cn.bmob.v3.datatype.BmobDate;
 import cn.bmob.v3.exception.BmobException;
@@ -62,30 +65,40 @@ public class PlanFragment extends BaseFragment implements View.OnClickListener {
      *
      */
 
-    private SwipeRefreshLayout refreshLayout;
+    @BindView(R.id.refresh)
+    SwipeRefreshLayout refreshLayout;
 
-    private Toolbar toolbar;
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
 
-    private LinearLayout linearlayout;
+    @BindView(R.id.linearlayout)
+    LinearLayout linearlayout;
 
-    private RecyclerView recyclerView;
+    @BindView(R.id.recycler)
+    RecyclerView recyclerView;
 
-    private TextView conclusion;
+    @BindView(R.id.conclusion)
+    TextView conclusion;
 
-    private Button save;
+    @BindView(R.id.save_change)
+    Button save;
 
-    private FloatingActionButton mAddFab;
+    @BindView(R.id.fab)
+    FloatingActionButton mAddFab;
 
     /** 隐藏页面
      *
      *  内容：昨天
      */
 
-    private RelativeLayout holdView;
+    @BindView(R.id.yes_page)
+    RelativeLayout holdView;
 
-    private TextView mYesConclusion;
+    @BindView(R.id.yes_conclusion)
+    TextView mYesConclusion;
 
-    private ImageView mYesBackground;
+    @BindView(R.id.yes_bac)
+    ImageView mYesBackground;
 
     /** RecyclerView
      *
@@ -112,25 +125,14 @@ public class PlanFragment extends BaseFragment implements View.OnClickListener {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_plan, container, false);
-        iniViews(view);
+        ButterKnife.bind(this, view);
+        iniViews();
         iniRecycler();
         load();
         return view;
     }
 
-    private void iniViews(View view){
-        holdView       = view.findViewById(R.id.yes_page);
-        mYesConclusion = view.findViewById(R.id.yes_conclusion);
-        mYesBackground = view.findViewById(R.id.yes_bac);
-
-        refreshLayout  = view.findViewById(R.id.refresh);
-        toolbar        = view.findViewById(R.id.toolbar);
-        linearlayout   = view.findViewById(R.id.linearlayout);
-        recyclerView   = view.findViewById(R.id.recycler);
-        conclusion     = view.findViewById(R.id.conclusion);
-        save           = view.findViewById(R.id.save_change);
-        mAddFab        = view.findViewById(R.id.fab);
-
+    private void iniViews(){
         if (toolbar != null){
             ((MainActivity)getActivity()).setSupportActionBar(toolbar);
         }
@@ -142,9 +144,8 @@ public class PlanFragment extends BaseFragment implements View.OnClickListener {
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                refreshLayout.setRefreshing(true);
-                planAdapter.notifyDataSetChanged();
-                refreshLayout.setRefreshing(false);
+                planList.clear();
+                load();
             }
         });
 
@@ -184,7 +185,7 @@ public class PlanFragment extends BaseFragment implements View.OnClickListener {
                                 .subscribe(new Observer<String>() {
                                     @Override
                                     public void onSubscribe(Disposable d) {
-
+                                        refreshLayout.setRefreshing(true);
                                     }
 
                                     @Override
@@ -199,7 +200,7 @@ public class PlanFragment extends BaseFragment implements View.OnClickListener {
 
                                     @Override
                                     public void onComplete() {
-
+                                        refreshLayout.setRefreshing(false);
                                     }
                                 });
                     }
@@ -432,18 +433,18 @@ public class PlanFragment extends BaseFragment implements View.OnClickListener {
     private void dialogShow() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = LayoutInflater.from(getActivity());
-        View v = inflater.inflate(R.layout.dialog_push_item, null);
-        final EditText fromHour    = v.findViewById(R.id.start_hour);
-        final EditText fromMinutes = v.findViewById(R.id.start_minutes);
-        final EditText toHour      = v.findViewById(R.id.end_hour);
-        final EditText toMinutes   = v.findViewById(R.id.end_minutes);
-        final EditText planName    = v.findViewById(R.id.plan_name);
-        Button btn_sure   = v.findViewById(R.id.dialog_btn_sure);
-        Button btn_cancel = v.findViewById(R.id.dialog_btn_cancel);
+        View view = inflater.inflate(R.layout.dialog_push_item, null);
+        final EditText fromHour    = ButterKnife.findById(view, R.id.start_hour);
+        final EditText fromMinutes = ButterKnife.findById(view, R.id.start_minutes);
+        final EditText toHour      = ButterKnife.findById(view, R.id.end_hour);
+        final EditText toMinutes   = ButterKnife.findById(view, R.id.end_minutes);
+        final EditText planName    = ButterKnife.findById(view, R.id.plan_name);
+        Button btn_sure   = ButterKnife.findById(view, R.id.dialog_btn_sure);
+        Button btn_cancel = ButterKnife.findById(view, R.id.dialog_btn_cancel);
         // builer.setView(v);//这里如果使用builer.setView(v)，自定义布局只会覆盖title和button之间的那部分
         final Dialog dialog = builder.create();
         dialog.show();
-        dialog.getWindow().setContentView(v);//自定义布局应该在这里添加，要在dialog.show()的后面
+        dialog.getWindow().setContentView(view);//自定义布局应该在这里添加，要在dialog.show()的后面
         // dialog.getWindow().setGravity(Gravity.CENTER);//可以设置显示的位置
         btn_sure.setOnClickListener(new View.OnClickListener() {
 

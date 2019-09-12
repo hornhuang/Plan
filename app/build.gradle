@@ -1,6 +1,4 @@
 apply plugin: 'com.android.application'
-//apply plugin: 'com.android.library'
-//apply plugin: 'com.jakewharton.butterknife'
 
 android {
     compileSdkVersion 28
@@ -10,6 +8,7 @@ android {
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
+//        vectorDrawables.useSupportLibrary = true
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -38,11 +37,11 @@ dependencies {
 
     // Bmob
     implementation 'cn.bmob.android:bmob-sdk:3.7.3-rc1'
-    implementation "io.reactivex.rxjava2:rxjava:2.2.2"
+    implementation "io.reactivex.rxjava2:rxjava:2.2.3"
     implementation 'io.reactivex.rxjava2:rxandroid:2.1.0'
     implementation 'com.squareup.okio:okio:2.1.0'
     implementation 'com.google.code.gson:gson:2.8.5'
-    implementation 'com.squareup.okhttp3:okhttp:3.12.0'
+    implementation 'com.squareup.okhttp3:okhttp:3.12.1'
 
     // Glide
     implementation 'com.github.bumptech.glide:glide:4.9.0'
@@ -52,6 +51,7 @@ dependencies {
     implementation 'com.github.mcxtzhang:SwipeDelMenuLayout:V1.3.0'// 侧拉删除
 
     // Butter Knife
-//    implementation 'com.jakewharton:butterknife:10.1.0'
-//    annotationProcessor 'com.jakewharton:butterknife-compiler:10.1.0'
+    // 请勿更新版本：https://github.com/JakeWharton/butterknife/issues/1413
+    implementation 'com.jakewharton:butterknife:8.8.1'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
 }

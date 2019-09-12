@@ -30,6 +30,7 @@ import com.example.plan.utils.PopupWindowUtil;
 
 import java.util.List;
 
+import butterknife.ButterKnife;
 import cn.bmob.v3.exception.BmobException;
 import cn.bmob.v3.listener.UpdateListener;
 
@@ -59,6 +60,7 @@ public class PlanAdapter extends RecyclerView.Adapter<PlanAdapter.ViewHolder> {
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
         View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_list_plan, viewGroup, false);
+        ButterKnife.bind(view);
         return new ViewHolder(view);
     }
 
