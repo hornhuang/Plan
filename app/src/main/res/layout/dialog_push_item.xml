@@ -42,6 +42,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:digits="1234567890."
                 android:hint="@string/hour"/>
 
             <TextView
@@ -54,6 +55,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:digits="1234567890."
                 android:hint="@string/minutes"/>
 
         </LinearLayout>
@@ -76,6 +78,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:digits="1234567890."
                 android:hint="@string/hour"/>
 
             <TextView
@@ -88,6 +91,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:digits="1234567890."
                 android:hint="@string/minutes"/>
 
         </LinearLayout>

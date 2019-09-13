@@ -17,6 +17,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -42,6 +43,7 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.Unbinder;
 import cn.bmob.v3.BmobQuery;
 import cn.bmob.v3.datatype.BmobDate;
 import cn.bmob.v3.exception.BmobException;
@@ -60,6 +62,8 @@ public class PlanFragment extends BaseFragment implements View.OnClickListener {
     private final String TAG = "PlanFragment";
 
     private boolean pageFlag = false;
+
+    private Unbinder unbinder;
 
     /** 主界面
      *
@@ -125,7 +129,7 @@ public class PlanFragment extends BaseFragment implements View.OnClickListener {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_plan, container, false);
-        ButterKnife.bind(this, view);
+        unbinder = ButterKnife.bind(this, view);
         iniViews();
         iniRecycler();
         load();
@@ -257,7 +261,12 @@ public class PlanFragment extends BaseFragment implements View.OnClickListener {
     private void iniRecycler(){
         planList = new ArrayList<>();
         planMap  = new HashMap<>();
-        LinearLayoutManager manager = new LinearLayoutManager(getActivity());
+        LinearLayoutManager manager = new LinearLayoutManager(getActivity()){
+            @Override
+            public boolean canScrollVertically() {
+                return false;
+            }
+        };
         recyclerView.setLayoutManager(manager);
         planAdapter = new PlanAdapter(planList, getActivity(), this);
         recyclerView.setAdapter(planAdapter);
@@ -441,6 +450,10 @@ public class PlanFragment extends BaseFragment implements View.OnClickListener {
         final EditText planName    = ButterKnife.findById(view, R.id.plan_name);
         Button btn_sure   = ButterKnife.findById(view, R.id.dialog_btn_sure);
         Button btn_cancel = ButterKnife.findById(view, R.id.dialog_btn_cancel);
+        fromHour.setInputType(EditorInfo.TYPE_CLASS_PHONE);
+        fromMinutes.setInputType(EditorInfo.TYPE_CLASS_PHONE);
+        toHour.setInputType(EditorInfo.TYPE_CLASS_PHONE);
+        toMinutes.setInputType(EditorInfo.TYPE_CLASS_PHONE);
         // builer.setView(v);//这里如果使用builer.setView(v)，自定义布局只会覆盖title和button之间的那部分
         final Dialog dialog = builder.create();
         dialog.show();
@@ -495,6 +508,12 @@ public class PlanFragment extends BaseFragment implements View.OnClickListener {
                 .show();
         dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
         dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        unbinder.unbind();// 重置绑定
     }
 
     public List<Plan> getPlanList() {
