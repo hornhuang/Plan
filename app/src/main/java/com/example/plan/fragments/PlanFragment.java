@@ -57,6 +57,12 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import jp.wasabeef.glide.transformations.BlurTransformation;
 
+
+/**
+ * 由于 Bmob 政策原因
+ * 实名认证外加月访问量 1000 限制等原因
+ * 现将此模块处理出一个新储存库（ 建立新 app 换一个 AppId 分散访问量）
+ */
 public class PlanFragment extends BaseFragment implements View.OnClickListener {
 
     private final String TAG = "PlanFragment";
@@ -130,6 +136,10 @@ public class PlanFragment extends BaseFragment implements View.OnClickListener {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_plan, container, false);
         unbinder = ButterKnife.bind(this, view);
+        /**
+         * 关闭初始化
+         * 作废该方法
+         */
         iniViews();
         iniRecycler();
         load();
@@ -199,7 +209,7 @@ public class PlanFragment extends BaseFragment implements View.OnClickListener {
 
                                     @Override
                                     public void onError(Throwable e) {
-
+                                        refreshLayout.setRefreshing(false);
                                     }
 
                                     @Override

@@ -20,6 +20,7 @@ import java.util.List;
  * 3。待办事项
  * 4。侧拉框我的历史信息
  */
+
 public class MainActivity extends BaseActivity {
 
     private TabLayout mTabLayout;
@@ -50,9 +51,9 @@ public class MainActivity extends BaseActivity {
         mTitleList.add("chart");
 
         //添加tab选项卡，默认第一个选中
-        mTabLayout.addTab(mTabLayout.newTab().setText(mTitleList.get(0)), true);
-        mTabLayout.addTab(mTabLayout.newTab().setText(mTitleList.get(1)));
-        mTabLayout.addTab(mTabLayout.newTab().setText(mTitleList.get(2)));
+        mTabLayout.addTab(mTabLayout.newTab().setText(mTitleList.get(0)),false);
+        mTabLayout.addTab(mTabLayout.newTab().setText(mTitleList.get(1)),true);// 由于其他两模块移除，此模块设为首选
+        mTabLayout.addTab(mTabLayout.newTab().setText(mTitleList.get(2)),false);
 
         MyPagerAdapter mAdapter = new MyPagerAdapter(getSupportFragmentManager(), mFragments);
         //给ViewPager设置适配器

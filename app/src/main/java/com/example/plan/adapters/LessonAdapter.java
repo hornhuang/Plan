@@ -17,6 +17,9 @@ import com.example.plan.utils.Dater;
 import java.util.Date;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class LessonAdapter extends RecyclerView.Adapter<LessonAdapter.ViewHolder> {
 
     private List<Lesson> mList;
@@ -58,21 +61,21 @@ public class LessonAdapter extends RecyclerView.Adapter<LessonAdapter.ViewHolder
 
     class ViewHolder extends RecyclerView.ViewHolder {
 
-        private TextView mName;
+        @BindView(R.id.name)
+        TextView mName;
 
-        private EditText mCourse;
+        @BindView(R.id.course)
+        EditText mCourse;
 
-        private TextView mDate;
+        @BindView(R.id.date)
+        TextView mDate;
 
-        private TextView mDatePoor;
+        @BindView(R.id.date_poor)
+        TextView mDatePoor;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            mName     = itemView.findViewById(R.id.name);
-            mCourse   = itemView.findViewById(R.id.course);
-            mDate     = itemView.findViewById(R.id.date);
-            mDatePoor = itemView.findViewById(R.id.date_poor);
-
+            ButterKnife.bind(this, itemView);
         }
     }
 }

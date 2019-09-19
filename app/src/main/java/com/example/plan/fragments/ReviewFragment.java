@@ -23,22 +23,30 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 import cn.bmob.v3.BmobQuery;
 import cn.bmob.v3.exception.BmobException;
 import cn.bmob.v3.listener.FindListener;
 import cn.bmob.v3.listener.UpdateListener;
 
+
 public class ReviewFragment extends BaseFragment {
 
     private final String TAG = "ReviewListFragment";
 
-    private SwipeRefreshLayout mRefreshLayout;
+    @BindView(R.id.refresh)
+    SwipeRefreshLayout mRefreshLayout;
 
-    private Toolbar toolbar;
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
 
-    private RecyclerView recyclerView;
+    @BindView(R.id.recycler)
+    RecyclerView recyclerView;
 
-    private FloatingActionButton fab;
+    @BindView(R.id.fab)
+    FloatingActionButton fab;
 
     private List<Lesson> mLessonLists;
 
@@ -54,26 +62,15 @@ public class ReviewFragment extends BaseFragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_review, container, false);
-        iniViews(view);
+        ButterKnife.bind(this, view);
+        iniViews();
         iniRecyclerView();
         return view;
     }
 
-    private void iniViews(View view){
-        toolbar        = view.findViewById(R.id.toolbar);
-        recyclerView   = view.findViewById(R.id.recycler);
-        fab            = view.findViewById(R.id.fab);
-        mRefreshLayout = view.findViewById(R.id.refresh);
-
+    private void iniViews(){
         toolbar.setTitle("复习");
         toolbar.setTitleTextColor(Color.WHITE);
-
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                PushReviewActivity.actionStart(getActivity());
-            }
-        });
 
         mRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -82,6 +79,11 @@ public class ReviewFragment extends BaseFragment {
                 getData();
             }
         });
+    }
+
+    @OnClick(R.id.fab)
+    public void fabOnClick(View view){
+        PushReviewActivity.actionStart(getActivity());
     }
 
     private void iniRecyclerView(){
